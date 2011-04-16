@@ -66,7 +66,7 @@ is($obj->c('Hello'), 'こんにちは');
 $c = $obj->converter;
 is($c->('Good evening'), 'こんばんは');
 
-eval{ $obj->input_lang('en where a IS TRUE'); }; # SQL Injection
+eval{ $obj->input_lang(q|en FROM m17n; SELECT mysql.user FROM mysql WHERE 'a' = 'a'; SELECT en|); }; # SQL Injection
 like($@, qr{^Language name can use only ascii and number});
 
 $dbh->disconnect;
