@@ -1,0 +1,17 @@
+NAME
+    Text::M17N -
+
+SYNOPSIS
+      use Text::M17N;
+
+DESCRIPTION
+    Text::M17N is
+
+AUTHOR
+    Kenta Sato <kenta.sato.1990@gmail.com>
+
+SEE ALSO
+LICENSE
+    This library is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
