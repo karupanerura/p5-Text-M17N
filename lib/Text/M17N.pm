@@ -60,10 +60,7 @@ sub _load_lang_db{
     
     die(q|Table name can use only ascii and number.|) if $self->{table} !~ $__ok__;
     die(q|Language name can use only ascii and number.|) if $lang !~ $__ok__;
-    
-    my $sth = 
-    
-    
+        
     my $_tmp = $self->{dbh}->selectall_arrayref("SELECT $lang FROM " . $self->{table}); 
     my @data = map{
 	my $data = $_;
