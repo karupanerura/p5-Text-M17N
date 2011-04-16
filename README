@@ -1,14 +1,48 @@
 NAME
-    Text::M17N -
+    Text::M17N - Simple text multi-lingualization processor
 
 SYNOPSIS
       use Text::M17N;
 
+      my $encoder = Text::M17N->new(
+        lang_dir   => './lang',
+        input_lang => 'ja'
+      );
+
+      $encoder->output_lang('en');
+      print $encoder->convert('こんにちは！'); # print"Hello!"
+      print $encoder->c('こんにちは！'); # print"Hello!" (alias)
+      my $c = $encoder->converter;
+      $c->('こんにちは！'); # print"Hello!"
+
+    or
+
+      use DBI;
+      use Text::M17N;
+
+      my $encoder = Text::M17N->new(
+        dbh   => DBI->connect(...),
+        table => 'm17n',
+        input_lang => 'ja'
+      );
+
+      # CREATE TABLE m17n(
+      #   jp TEXT,
+      #   en TEXT
+      # );
+
+      $encoder->output_lang('en');
+      print $encoder->convert('こんにちは！'); # print"Hello!"
+      print $encoder->c('こんにちは！'); # print"Hello!" (alias)
+      my $c = $encoder->converter;
+      $c->('こんにちは！'); # print"Hello!"
+
 DESCRIPTION
-    Text::M17N is
+    Text::M17N is text multi lingualization support. This module have simple
+    interface, and easy to use.
 
 AUTHOR
-    Kenta Sato <kenta.sato.1990@gmail.com>
+    Kenta Sato <k-sato@mfac.jp>
 
 SEE ALSO
 LICENSE

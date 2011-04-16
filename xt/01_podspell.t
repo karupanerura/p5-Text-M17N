@@ -8,3 +8,4 @@ __DATA__
 Kenta Sato
 kenta.sato.1990@gmail.com
 Text::M17N
+multi-lingualization
