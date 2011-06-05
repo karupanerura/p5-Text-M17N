@@ -41,13 +41,12 @@ or
 
 =head1 DESCRIPTION
 
-Text::M17N is text multi lingualization support.
+Text::M17N is text multi-lingualization support.
 This module have simple interface, and easy to use.
-
 
 =head1 AUTHOR
 
-Kenta Sato E<lt>k-sato@mfac.jpE<gt>
+Kenta Sato E<lt>karupa@cpan.orgE<gt>
 
 =head1 SEE ALSO
 

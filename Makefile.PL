@@ -10,6 +10,8 @@ githubmeta;
 tests 't/*.t';
 author_tests 'xt';
 
+requires 'File::Spec';
+
 build_requires 'Test::More';
 auto_set_repository;
 auto_include;

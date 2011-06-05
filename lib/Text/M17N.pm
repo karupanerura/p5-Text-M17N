@@ -4,7 +4,7 @@ use warnings;
 
 our $VERSION = '0.01';
 
-use IO::File;
+use Carp;
 use File::Spec;
 
 sub new{
@@ -18,8 +18,8 @@ sub new{
 	die(q|"lang_dir" option require directory.|) ;
     }
 
-    $self->{lang}   = +{};
-    $self->{_table} = +{};
+    $self->{lang}          = +{};
+    $self->{_table}        = +{};
     $self->{input_layer} ||= ':utf8';
     $self->input_lang($self->{input_lang})   if defined $self->{input_lang};
     $self->output_lang($self->{output_lang}) if defined $self->{output_lang};
@@ -30,9 +30,11 @@ sub new{
 sub load_lang{
     my($self, $lang) = @_;
     
-    return $self->{lang}{$lang} ||= $self->{_dbi_mode} ?
-	$self->_load_lang_db($lang):
-	$self->_load_lang($lang);
+    return $self->{lang}{$lang} ||= do{
+	$self->{_dbi_mode} ?
+	    $self->_load_lang_db($lang):
+	    $self->_load_lang($lang);
+    } or die(qq|${lang} load faild.|);
 }
 
 sub _load_lang{
@@ -42,30 +44,27 @@ sub _load_lang{
 
     die(qq|Don't found "$lang_file".|) unless(-f $lang_file);
 
-    my $file = IO::File->new($lang_file, 'r');
-    $file->binmode($self->{input_layer});
+    open(my $file, '<', $lang_file) or return;
+    binmode($file, $self->{input_layer});
     my @data = map{
 	my $data = $_;
 	chomp($data);
 	$data;
     } <$file>;
-    $file->close;
+    close($file) or return;
 
     return \@data;
 }
 
-my $__ok__ = qr{^[a-zA-Z0-9]+$}o;
+my $__ok__ = qr{^[a-zA-Z0-9]+$}o; # SQL injection filter
 sub _load_lang_db{
     my($self, $lang) = @_;
     
-    die(q|Table name can use only ascii and number.|) if $self->{table} !~ $__ok__;
-    die(q|Language name can use only ascii and number.|) if $lang !~ $__ok__;
+    croak(q|Table name can use only ascii and number.|)    unless( $self->{table} =~ $__ok__ );
+    croak(q|Language name can use only ascii and number.|) unless( $lang          =~ $__ok__ );
         
-    my $_tmp = $self->{dbh}->selectall_arrayref("SELECT $lang FROM " . $self->{table}); 
-    my @data = map{
-	my $data = $_;
-	$data->[0];
-    } @{$_tmp};
+    my $_tmp = $self->{dbh}->selectall_arrayref("SELECT $lang FROM " . $self->{table}) or return;
+    my @data = map{ $_->[0] } @{$_tmp};
 
     return \@data;
 }
@@ -169,11 +168,9 @@ or
 Text::M17N is text multi-lingualization support.
 This module have simple interface, and easy to use.
 
-
-
 =head1 AUTHOR
 
-Kenta Sato E<lt>k-sato@mfac.jpE<gt>
+Kenta Sato E<lt>karupa@cpan.orgE<gt>
 
 =head1 SEE ALSO
 
