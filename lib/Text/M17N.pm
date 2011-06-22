@@ -13,9 +13,9 @@ sub new{
     my $self = bless(((scalar(@_) == 1) ? @_ : +{@_}) => $class);
     
     if(defined($self->{dbh}) and defined($self->{dbh}) and defined($self->{table})){
-	$self->{_dbi_mode} = 1;
+        $self->{_dbi_mode} = 1;
     }elsif(not(defined($self->{lang_dir}) and -d $self->{lang_dir})){
-	die(q|"lang_dir" option require directory.|) ;
+        croak(q|"lang_dir" option require directory.|) ;
     }
 
     $self->{lang}          = +{};
@@ -30,11 +30,10 @@ sub new{
 sub load_lang{
     my($self, $lang) = @_;
     
-    return $self->{lang}{$lang} ||= do{
-	$self->{_dbi_mode} ?
-	    $self->_load_lang_db($lang):
-	    $self->_load_lang($lang);
-    } or die(qq|${lang} load faild.|);
+    return $self->{lang}{$lang} ||= $self->{_dbi_mode} ?
+        $self->_load_lang_db($lang):
+        $self->_load_lang($lang)
+            or croak(qq|${lang} load faild.|);
 }
 
 sub _load_lang{
@@ -42,17 +41,17 @@ sub _load_lang{
 
     my $lang_file = File::Spec->catfile($self->{lang_dir}, $lang);
 
-    die(qq|Don't found "$lang_file".|) unless(-f $lang_file);
+    return unless(-f $lang_file);
 
     open(my $file, '<', $lang_file) or return;
     binmode($file, $self->{input_layer});
     my @data = map{
-	my $data = $_;
-	chomp($data);
-	$data;
+        my $data = $_;
+        chomp($data);
+        $data;
     } <$file>;
     close($file) or return;
-
+    
     return \@data;
 }
 
@@ -62,27 +61,27 @@ sub _load_lang_db{
     
     croak(q|Table name can use only ascii and number.|)    unless( $self->{table} =~ $__ok__ );
     croak(q|Language name can use only ascii and number.|) unless( $lang          =~ $__ok__ );
-        
+    
     my $_tmp = $self->{dbh}->selectall_arrayref("SELECT $lang FROM " . $self->{table}) or return;
     my @data = map{ $_->[0] } @{$_tmp};
-
+    
     return \@data;
 }
 
 sub input_lang{
     my($self, $lang) = @_;
-
+    
     $self->{input_lang} = $lang;
     $self->{_table}{$lang} ||= +{};
-
+    
     return $self->load_lang($lang);
 }
- 
+
 sub output_lang{
     my($self, $lang) = @_;
-
+    
     $self->{output_lang} = $lang;
-
+    
     return $self->load_lang($lang);
 }
 
@@ -91,21 +90,21 @@ sub convert{
     
     my $in  = $self->{input_lang};
     my $out = $self->{output_lang};
-
+    
     my $hash_table =
-	$self->{_table}{$in}{$out} ||= $self->make_table($in, $out);
-
+        $self->{_table}{$in}{$out} ||= $self->make_table($in, $out);
+    
     return $hash_table->{$text} or die('convert faild.');
 }
 
 sub make_table{
     my($self, $in, $out) = @_;
-
+    
     my $table = +{};
     my @input = @{$self->{lang}{$in}};
     
     foreach my $i (0 .. $#input){
-	$table->{$input[$i]} = $self->{lang}{$out}->[$i];
+        $table->{$input[$i]} = $self->{lang}{$out}->[$i];
     }
     
     return $table;
